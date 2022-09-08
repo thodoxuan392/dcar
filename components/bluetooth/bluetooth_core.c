@@ -24,7 +24,7 @@
 #define HEART_PROFILE_NUM                         1
 #define HEART_PROFILE_APP_IDX                     0
 #define ESP_HEART_RATE_APP_ID                     0x51
-#define EXAMPLE_DEVICE_NAME                       "ESP_BLE_SECURITY"
+#define EXAMPLE_DEVICE_NAME                       "DCAR"
 #define HEART_RATE_SVC_INST_ID                    0
 
 #define GATTS_DEMO_CHAR_VAL_LEN_MAX               0x40

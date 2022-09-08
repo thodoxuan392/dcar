@@ -58,7 +58,8 @@ typedef struct {
 
 void uart_api_init();
 void uart_api_loop();                      // Run in supper loop for parse rsp
-void uart_api_send_cmd(uart_cmd_t);         
+void uart_api_send_cmd(uart_cmd_t);   
+int uart_api_cmp_with_ptr(uart_cmd_t uart_cmd , uint8_t* ptr);      
 uint8_t * uart_api_get_buffer();
 void uart_api_reset_buffer();
 
