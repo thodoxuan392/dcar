@@ -1,32 +1,33 @@
-# _Sample project_
+# Dcar
+Dcar Controller Project. It receive command from bluetooth then send it to uart.
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+## Prerequisite
+- Target: ESP32-WROOM
+- Framework: ESPIDF version 4.4.2
+- Environment: Ubuntu
 
-This is the simplest buildable example. The example is used by command `idf.py create-project`
-that copies the project to user specified path and set it's name. For more information follow the [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project)
+## Install
+- ESPIDF: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html
+
+## Clone 
+
+    git clone https://github.com/thodoxuan392/dcar
+
+## Build
+*Export ESPIDF to Project Workspace*
+
+    cd dcar
+    . ~/esp/esp-idf/export.sh
 
 
+*Build Project*
 
-## How to use example
-We encourage the users to use the example as a template for the new projects.
-A recommended way is to follow the instructions on a [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project).
+    idf.py build
 
-## Example folder contents
+## Flash Image
 
-The project **sample_project** contains one source file in C language [main.c](main/main.c). The file is located in folder [main](main).
+    idf.py flash -p /dev/ttyUSB0
 
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt`
-files that provide set of directives and instructions describing the project's source files and targets
-(executable, library, or both). 
+## Monitor Device
 
-Below is short explanation of remaining files in the project folder.
-
-```
-├── CMakeLists.txt
-├── main
-│   ├── CMakeLists.txt
-│   └── main.c
-└── README.md                  This is the file you are currently reading
-```
-Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
-They are not used or needed when building with CMake and idf.py.
+    idf.py monitor -p /dev/ttyUSB0
