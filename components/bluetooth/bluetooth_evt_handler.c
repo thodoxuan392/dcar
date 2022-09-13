@@ -22,7 +22,6 @@ static const char * TAG = "bluetooth_evt_handler";
 static QueueHandle_t bt_cmd_queue;
 static const uint16_t bt_cmd_queue_size = 100;
 
-
 /* Private Function*/
 
 void bluetooth_event_write_cb(void * data){
