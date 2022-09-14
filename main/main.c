@@ -16,9 +16,11 @@ void app_init(){
 
 void app_main(void)
 {
-    TaskHandle_t uart_handle;
-    TaskHandle_t task_handle;
     app_init();
-    xTaskCreate( uart_api_loop, "Uart loop", 4096, NULL, tskIDLE_PRIORITY, &uart_handle );
-    xTaskCreate( task_run, "Uart loop", 4096, NULL, tskIDLE_PRIORITY, &task_handle );
+    // xTaskCreatePinnedToCore( task_run, "Task loop", 8096, NULL, tskIDLE_PRIORITY, NULL , 0);
+    // xTaskCreatePinnedToCore( uart_api_loop, "Uart loop", 8096, NULL, tskIDLE_PRIORITY, NULL , 0 );
+    while(1){
+        uart_api_loop();
+        task_run();
+    }
 }

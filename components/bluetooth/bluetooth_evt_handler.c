@@ -25,22 +25,362 @@ static const uint16_t bt_cmd_queue_size = 100;
 /* Private Function*/
 
 void bluetooth_event_write_cb(void * data){
+    char msg[200] = {0};
     esp_ble_gatts_cb_param_t *param = data;
     char * ble_msg =  strndup((char*)param->write.value ,param->write.len);
-    ESP_LOGI(TAG , "Write cb data: %s\n" , ble_msg);
-    uint8_t device_id;
-    uint8_t value;
-    int rc = bluetooth_messag_parse(ble_msg, &device_id, &value);
-    if(rc != 0){
-        ESP_LOGE(TAG, "Bluetooth Parse Error\n");
+    size_t msg_len = param->write.len;
+    ESP_LOGI(TAG, "%s\n" , ble_msg);
+    cmd_t cmd;
+    if(ble_msg[0] != '!' || ble_msg[msg_len-1] != '#'){
+        ESP_LOGE(TAG , "Bluetooth Command Wrong Format, It should be !{CMD}#");
         return;
     }
-    bt_cmd_t bt_cmd = {
-        .device_id = device_id,
-        .value = value
-    };
-    bluetooth_cmd_add(bt_cmd);
-    ESP_LOGI(TAG , "device_id %d , value: %d\n" , device_id, value);
+    memcpy(msg , ble_msg + 1, msg_len - 2);
+    if(!strcmp(msg , "DCAR_CURTAIN_UP")){
+        // Max Speed
+        cmd.value = MAX_SPEED;
+
+        // CURTAIN_FRONT_LEFT
+        cmd.device = CURTAIN_FRONT_LEFT;
+        bluetooth_cmd_add(cmd);
+
+        // CURTAIN_FRONT_RIGHT
+        cmd.device = CURTAIN_FRONT_RIGHT;
+        bluetooth_cmd_add(cmd);
+
+        // CURTAIN_REAR_CENTER
+        cmd.device = CURTAIN_REAR_CENTER;
+        bluetooth_cmd_add(cmd);
+
+        // CURTAIN_REAR_LEFT
+        cmd.device = CURTAIN_REAR_LEFT;
+        bluetooth_cmd_add(cmd);
+
+        // CURTAIN_REAR_LEFT
+        cmd.device = CURTAIN_REAR_RIGHT;
+        bluetooth_cmd_add(cmd);
+        
+    }
+    else if(!strcmp(msg , "DCAR_CURTAIN_DOWN")){
+        cmd.value = OFF;
+
+        // CURTAIN_FRONT_LEFT
+        cmd.device = CURTAIN_FRONT_LEFT;
+        bluetooth_cmd_add(cmd);
+
+        // CURTAIN_FRONT_RIGHT
+        cmd.device = CURTAIN_FRONT_RIGHT;
+        bluetooth_cmd_add(cmd);
+
+        // CURTAIN_REAR_CENTER
+        cmd.device = CURTAIN_REAR_CENTER;
+        bluetooth_cmd_add(cmd);
+
+        // CURTAIN_REAR_LEFT
+        cmd.device = CURTAIN_REAR_LEFT;
+        bluetooth_cmd_add(cmd);
+
+        // CURTAIN_REAR_LEFT
+        cmd.device = CURTAIN_REAR_RIGHT;
+        bluetooth_cmd_add(cmd);
+    }
+    else if(!strcmp(msg , "DCAR_LED_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = LIGHT_4X;
+        bluetooth_cmd_add(cmd);
+
+        cmd.device = LIGHT_CEILING;
+        bluetooth_cmd_add(cmd);
+
+        cmd.device = LIGHT_DRAWERS;
+        bluetooth_cmd_add(cmd);
+
+        cmd.device = LIGHT_SIDE;
+        bluetooth_cmd_add(cmd);
+
+    }
+    else if(!strcmp(msg , "DCAR_LED_OFF")){
+        cmd.value = OFF;
+
+        cmd.device = LIGHT_4X;
+        bluetooth_cmd_add(cmd);
+
+        cmd.device = LIGHT_CEILING;
+        bluetooth_cmd_add(cmd);
+
+        cmd.device = LIGHT_DRAWERS;
+        bluetooth_cmd_add(cmd);
+
+        cmd.device = LIGHT_SIDE;
+        bluetooth_cmd_add(cmd);
+
+    }
+    else if(!strcmp(msg , "LEFT_SEAT_UP") || !strcmp(msg , "DCAR_LEFT_SEAT_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = LEFT_SEAT_A;
+        bluetooth_cmd_add(cmd);
+    }
+    else if(!strcmp(msg , "LEFT_SEAT_DOWN") || !strcmp(msg , "DCAR_LEFT_SEAT_OFF")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = LEFT_SEAT_B;
+        bluetooth_cmd_add(cmd);
+    }
+    else if(!strcmp(msg , "RIGHT_SEAT_UP") || !strcmp(msg , "DCAR_RIGHT_SEAT_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = RIGHT_SEAT_A;
+        bluetooth_cmd_add(cmd);
+    }
+    else if(!strcmp(msg , "LEFT_SEAT_DOWN") || !strcmp(msg , "DCAR_LEFT_SEAT_OFF")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = RIGHT_SEAT_B;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "LEFT_SEAT_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = LEFT_SEAT_A;
+        bluetooth_cmd_add(cmd);
+
+        cmd.device = LEFT_SEAT_B;
+        bluetooth_cmd_add(cmd);
+    }
+    else if(!strcmp(msg , "RIGHT_SEAT_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = RIGHT_SEAT_A;
+        bluetooth_cmd_add(cmd);
+
+        cmd.device = RIGHT_SEAT_B;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "LIGHT_TOP_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = LIGHT_4X;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "LIGHT_TOP_OFF")){
+        cmd.value = OFF;
+
+        cmd.device = LIGHT_4X;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "LIGHT_CEILLING_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = LIGHT_CEILING;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "LIGHT_CEILLING_OFF")){
+        cmd.value = OFF;
+
+        cmd.device = LIGHT_CEILING;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "LIGHT_DRAWERS_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = LIGHT_DRAWERS;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "LIGHT_DRAWERS_OFF")){
+        cmd.value = OFF;
+
+        cmd.device = LIGHT_DRAWERS;
+        bluetooth_cmd_add(cmd);
+    }
+
+        else if(!strcmp(msg , "LIGHT_SIDE_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = LIGHT_SIDE;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "LIGHT_SIDE_OFF")){
+        cmd.value = OFF;
+
+        cmd.device = LIGHT_SIDE;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "TABLE_LEFT_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = LEFT_TABLE;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "TABLE_LEFT_OFF")){
+        cmd.value = OFF;
+
+        cmd.device = LEFT_TABLE;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "TABLE_LEFT_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = LEFT_TABLE;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "TABLE_RIGHT_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = RIGHT_TABLE;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "TABLE_RIGHT_OFF")){
+        cmd.value = OFF;
+
+        cmd.device = RIGHT_TABLE;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "TABLE_RIGHT_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = RIGHT_TABLE;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "TIVI_ON")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = TV;
+        bluetooth_cmd_add(cmd);
+    }
+    else if(!strcmp(msg , "TIVI_OFF")){
+        cmd.value = OFF;
+
+        cmd.device = TV;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_FRONT_LEFT_UP")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = CURTAIN_FRONT_LEFT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_FRONT_LEFT_DOWN")){
+        cmd.value = OFF;
+
+        cmd.device = CURTAIN_FRONT_LEFT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_FRONT_LEFT_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = CURTAIN_FRONT_LEFT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_FRONT_RIGHT_UP")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = CURTAIN_FRONT_RIGHT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_FRONT_RIGHT_DOWN")){
+        cmd.value = OFF;
+
+        cmd.device = CURTAIN_FRONT_RIGHT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_FRONT_RIGHT_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = CURTAIN_FRONT_RIGHT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_LEFT_UP")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = CURTAIN_REAR_LEFT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_LEFT_DOWN")){
+        cmd.value = OFF;
+
+        cmd.device = CURTAIN_REAR_LEFT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_LEFT_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = CURTAIN_REAR_LEFT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_RIGHT_UP")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = CURTAIN_REAR_RIGHT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_RIGHT_DOWN")){
+        cmd.value = OFF;
+
+        cmd.device = CURTAIN_REAR_RIGHT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_RIGHT_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = CURTAIN_REAR_RIGHT;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_CENTER_UP")){
+        cmd.value = MAX_SPEED;
+
+        cmd.device = CURTAIN_REAR_CENTER;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_CENTER_DOWN")){
+        cmd.value = OFF;
+
+        cmd.device = CURTAIN_REAR_CENTER;
+        bluetooth_cmd_add(cmd);
+    }
+
+    else if(!strcmp(msg , "CURTAIN_REAR_CENTER_STOP")){
+        cmd.value = INVERSE_MAX_SPEED;
+
+        cmd.device = CURTAIN_REAR_CENTER;
+        bluetooth_cmd_add(cmd);
+    }
+
+
+    else{
+        ESP_LOGE(TAG, "Bluetooth Command Not Found\n");
+        return;
+    }
 }
 
 
@@ -48,92 +388,23 @@ void bluetooth_event_write_cb(void * data){
 
 void bluetooth_evt_handler_init(){
     // Init Queue Bluetooth Message
-    bt_cmd_queue = xQueueCreate(bt_cmd_queue_size , sizeof(bt_cmd_t));
+    bt_cmd_queue = xQueueCreate(bt_cmd_queue_size , sizeof(cmd_t));
 
 }
 
 
-int bluetooth_cmd_get(bt_cmd_t *bt_cmd){
-    return xQueueReceive(bt_cmd_queue , bt_cmd , 10);
+int bluetooth_cmd_get(cmd_t *cmd_t){
+    return xQueueReceive(bt_cmd_queue , cmd_t , 10);
 }
 
-void bluetooth_cmd_add(bt_cmd_t bt_cmd){
-    bt_cmd_t temp = bt_cmd;
-    xQueueSend(bt_cmd_queue, &temp ,200);
+void bluetooth_cmd_add(cmd_t cmd){
+    cmd_t temp_cmd = cmd;
+    xQueueSend(bt_cmd_queue, &temp_cmd ,200);
     ESP_LOGI(TAG,"bluetooth_cmd_add OK");
 }
 
 
-char * bluetooth_message_create(uint8_t bt_device_id , uint8_t bt_value){
-    sprintf(cmd_str, "!CMD_%d_%d#" , bt_device_id, bt_value);
+char * bluetooth_message_create(uint16_t device , uint8_t value){
+    sprintf(cmd_str, "Device: 0x%04x, Value: 0x%02x" , device, value);
     return cmd_str;
-}
-
-// Return 0 is Succes, return -1 is false
-int bluetooth_messag_parse(char *message , uint8_t* bt_device_id, uint8_t* bt_value){
-    size_t message_len = strlen(message);
-    /*
-        state:
-            0: find START BYTE
-            1: get bt_device_id
-            2: get bt_device_id
-            3: get bt_value
-    */
-    uint8_t state = 0;
-    char *cmd = CMD;
-    uint8_t device_id = 0;
-    uint8_t value = 0;
-    for (size_t i = 0; i < message_len; i++)
-    {
-        /* code */
-        switch (state)
-        {
-        case 0:
-            /* code */
-            if(message[i] == START_BYPE){
-                state = 1;
-            }
-            break;
-        case 1:
-            /* code */
-            if(message[i] == SEPERATE_BYTE){
-                state = 2;
-            }else{
-                // Check that valid "CMD"
-                if(i > strlen(cmd)){
-                    ESP_LOGE(TAG, "CMD prefix oversize\n");
-                    return -1;
-                }
-                // Compare cmd from message with "CMD" with less than 1 index
-                if(message[i] != cmd[i-1]){
-                    // Failed because diff from "CMD"
-                    ESP_LOGE(TAG, "CMD note matched\n");
-                    return -1;
-                }
-            }
-            break;
-        case 2:
-            /* code */
-            if(message[i] == SEPERATE_BYTE){
-                state = 3;
-            }else{
-                device_id+= message[i] - '0';
-            }
-            break;
-        case 3:
-            /* code */
-            if(message[i] == STOP_BYTE){
-                *bt_device_id = device_id;
-                *bt_value = value;
-                return 0;
-            }else{
-                value+= message[i] - '0';
-            }
-            break;
-        default:
-            break;
-        }
-    }
-    ESP_LOGE(TAG, "Command %s not found STOP_BYTE '%c'\n" ,message, STOP_BYTE);
-    return -1;
 }

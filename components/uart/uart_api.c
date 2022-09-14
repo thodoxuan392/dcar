@@ -19,36 +19,38 @@ void uart_api_loop(){
     // Get data from uart core -> push to uart_core_buffer
     esp_err_t ret;
     uint16_t buffered_len;
-    while(1){
-        uart_core_buffered_data_len(&buffered_len);
-        if(buffered_len > 0){
-            uint16_t data_len;
-            ret = uart_core_read_bytes(&uart_core_buffer[uart_buffer_index], 255 - uart_buffer_index, &data_len);
-            for (size_t i = 0; i < data_len; i++)
-            {
-                ESP_LOGI(TAG , "%02x" , uart_core_buffer[uart_buffer_index+ i]);
-            }
-            
-            
-            if(ret > 0){
-                uart_buffer_index += (uart_buffer_index + data_len) % 255;
-            }
+    uart_core_buffered_data_len(&buffered_len);
+    if(buffered_len > 0){
+        uint16_t data_len;
+        ret = uart_core_read_bytes(&uart_core_buffer[uart_buffer_index], 255 - uart_buffer_index, &data_len);
+        for (size_t i = 0; i < data_len; i++)
+        {
+            ESP_LOGI(TAG , "%02x" , uart_core_buffer[uart_buffer_index+ i]);
+        }
+        
+        
+        if(ret > 0){
+            uart_buffer_index += (uart_buffer_index + data_len) % 255;
         }
     }
+    // while(1){
+        
+    // }
 }
 
-void uart_api_send_cmd(uart_cmd_t uart_cmd){
-    uint8_t device_id_high = uart_cmd.device_id >> 8;
-    uint8_t device_id_low = uart_cmd.device_id & 0xFF;
+void uart_api_send_cmd(cmd_t uart_cmd){
+    uint8_t device_id_high = uart_cmd.device >> 8;
+    uint8_t device_id_low = uart_cmd.device & 0xFF;
     uint8_t value  = uart_cmd.value;
     uart_core_write_bytes(&device_id_high, 1);
     uart_core_write_bytes(&device_id_low, 1);
     uart_core_write_bytes(&value, 1);
+    ESP_LOGI(TAG,"uart_api_send_cmd");
 } 
 
-int uart_api_cmp_with_ptr(uart_cmd_t uart_cmd , uint8_t* ptr){
-    uint8_t device_id_high = uart_cmd.device_id >> 8;
-    uint8_t device_id_low = uart_cmd.device_id & 0xFF;
+int uart_api_cmp_with_ptr(cmd_t uart_cmd , uint8_t* ptr){
+    uint8_t device_id_high = uart_cmd.device>> 8;
+    uint8_t device_id_low = uart_cmd.device & 0xFF;
     uint8_t value  = uart_cmd.value;
     if(device_id_high != ptr[0]){
         return 0;

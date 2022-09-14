@@ -55,7 +55,7 @@ esp_err_t uart_core_read_bytes(uint8_t * data, uint16_t max_data_size,  uint16_t
         ESP_LOGE(TAG, "Uart size over max buffer\n");
         return ret;
     }
-    * data_len = uart_read_bytes(uart_num, data, max_data_size , 100);
+    * data_len = uart_read_bytes(uart_num, data, max_data_size , 0);
     if(* data_len == -1){
         ESP_LOGE(TAG, "uart_read_bytes failed");
         return ESP_FAIL;
