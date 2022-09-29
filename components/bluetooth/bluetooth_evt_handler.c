@@ -1,4 +1,5 @@
 #include "bluetooth_evt_handler.h"
+#include "common.h"
 #include "string.h"
 #include "esp_gap_ble_api.h"
 #include "esp_gatts_api.h"
@@ -8,10 +9,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 
-#define CMD             "CMD"
-#define START_BYPE      '!'
-#define STOP_BYTE       '#'
-#define SEPERATE_BYTE   '_'
+#define START_BYPE      '#'
+#define STOP_BYTE       '!'
 
 
 /* Private Variable */
@@ -29,12 +28,19 @@ void bluetooth_event_write_cb(void * data){
     esp_ble_gatts_cb_param_t *param = data;
     char * ble_msg =  strndup((char*)param->write.value ,param->write.len);
     size_t msg_len = param->write.len;
-    ESP_LOGI(TAG, "%s\n" , ble_msg);
+    ESP_LOGI(TAG, "%s" , ble_msg);
     cmd_t cmd;
-    if(ble_msg[0] != '!' || ble_msg[msg_len-1] != '#'){
+    if(ble_msg[0] != START_BYPE || ble_msg[msg_len-1] != STOP_BYTE){
         ESP_LOGE(TAG , "Bluetooth Command Wrong Format, It should be !{CMD}#");
         return;
     }
+    ble_msg = str_replace(ble_msg, "_CEIL_","_CEILLING_");
+    ble_msg = str_replace(ble_msg, "CUR_","CURTAIN_");
+    ble_msg = str_replace(ble_msg, "_LT_","_LEFT_");
+    ble_msg = str_replace(ble_msg, "_RT_","_RIGHT_");
+    ble_msg = str_replace(ble_msg, "_CR_","_CENTER_");
+    msg_len = strlen(ble_msg);
+    ESP_LOGI(TAG ,"%s" , ble_msg);
     memcpy(msg , ble_msg + 1, msg_len - 2);
     if(!strcmp(msg , "DCAR_CURTAIN_UP")){
         // Max Speed
@@ -134,7 +140,7 @@ void bluetooth_event_write_cb(void * data){
         cmd.device = RIGHT_SEAT_A;
         bluetooth_cmd_add(cmd);
     }
-    else if(!strcmp(msg , "LEFT_SEAT_DOWN") || !strcmp(msg , "DCAR_LEFT_SEAT_OFF")){
+    else if(!strcmp(msg , "RIGHT_SEAT_DOWN") || !strcmp(msg , "DCAR_LEFT_SEAT_OFF")){
         cmd.value = MAX_SPEED;
 
         cmd.device = RIGHT_SEAT_B;
@@ -376,9 +382,8 @@ void bluetooth_event_write_cb(void * data){
         bluetooth_cmd_add(cmd);
     }
 
-
     else{
-        ESP_LOGE(TAG, "Bluetooth Command Not Found\n");
+        ESP_LOGE(TAG, "Bluetooth Command %s Not Found\n" , msg);
         return;
     }
 }
