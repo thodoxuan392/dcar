@@ -33,9 +33,6 @@ void uart_api_loop(){
             uart_buffer_index += (uart_buffer_index + data_len) % 255;
         }
     }
-    // while(1){
-        
-    // }
 }
 
 void uart_api_send_cmd(cmd_t uart_cmd){
@@ -45,7 +42,7 @@ void uart_api_send_cmd(cmd_t uart_cmd){
     uart_core_write_bytes(&device_id_high, 1);
     uart_core_write_bytes(&device_id_low, 1);
     uart_core_write_bytes(&value, 1);
-    ESP_LOGI(TAG,"uart_api_send_cmd");
+    ESP_LOGI(TAG,"uart_api_send_cmd id: h=%u, l=%u, value= %u", device_id_high, device_id_low, value);
 } 
 
 int uart_api_cmp_with_ptr(cmd_t uart_cmd , uint8_t* ptr){

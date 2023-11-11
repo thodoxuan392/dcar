@@ -31,7 +31,7 @@ void bluetooth_event_write_cb(void * data){
     ESP_LOGI(TAG, "%s" , ble_msg);
     cmd_t cmd;
     if(ble_msg[0] != START_BYPE || ble_msg[msg_len-1] != STOP_BYTE){
-        ESP_LOGE(TAG , "Bluetooth Command Wrong Format, It should be !{CMD}#");
+        ESP_LOGE(TAG , "Bluetooth Command Wrong Format, It should be #{CMD}!");
         return;
     }
     ble_msg = str_replace(ble_msg, "_CEIL_","_CEILLING_");

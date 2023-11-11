@@ -10,8 +10,8 @@ static const char * TAG = "uart";
 
 static const uint16_t buffer_size  = 1024;
 static const uart_port_t uart_num = UART_NUM_2;
-static const uint8_t rx_pin = GPIO_NUM_16;
-static const uint8_t tx_pin = GPIO_NUM_17;
+static const uint8_t rx_pin = GPIO_NUM_17;
+static const uint8_t tx_pin = GPIO_NUM_16;
 
 static const uart_config_t uart_config = {
     .baud_rate = 9600,
