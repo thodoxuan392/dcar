@@ -153,7 +153,6 @@ typedef struct {
 
 static dcar_handle_t dcar_state;
 static void task_handle_dcar_state_by_cmd(cmd_t *cmd);
-static void task_build_command_from_button(uint8_t button_index, cmd_t *cmd);
 void task_init(){
     // Init timer for countdown to retry
     esp_timer_create(&retry_timer_args, &retry_timer);
@@ -165,30 +164,18 @@ void task_run(){
     switch (task_state)
         {
         case TASK_STATE_WAIT_BT_CMD:
-        if(current_time - previous_cmd_time > pdMS_TO_TICKS(cmd_time_threshold) ){
-            // Check bluetooth cmd is available
-            if(bluetooth_cmd_get(&current_cmd)){
-                // Send uart cmd
-                uart_api_reset_buffer();
-                esp_timer_start_once(retry_timer, retry_interval * 200);
-                uart_api_send_cmd(current_cmd);
-                ESP_LOGI(TAG, "uart_cmd_t size: %d" ,  sizeof(cmd_t));
-                // Switch to task_state TASK_STATE_WAIT_FOR_UART_RSPs
-                task_state = TASK_STATE_WAIT_FOR_UART_RSP;
-            }   
-            uint8_t button_index = button_get_pressed();
-            if(button_index != BUTTON_UNKNOWN){
-                task_build_command_from_button(button_index, &current_cmd);
-                // Send uart cmd
-                uart_api_reset_buffer();
-                esp_timer_start_once(retry_timer, retry_interval * 200);
-                uart_api_send_cmd(current_cmd);
-                ESP_LOGI(TAG, "uart_cmd_t size: %d" ,  sizeof(cmd_t));
-                // Switch to task_state TASK_STATE_WAIT_FOR_UART_RSPs
-                task_state = TASK_STATE_WAIT_FOR_UART_RSP;
+            if(current_time - previous_cmd_time > pdMS_TO_TICKS(cmd_time_threshold) ){
+                // Check bluetooth cmd is available
+                if(bluetooth_cmd_get(&current_cmd) || button_cmd_get(&current_cmd)){
+                    // Send uart cmd
+                    uart_api_reset_buffer();
+                    esp_timer_start_once(retry_timer, retry_interval * 200);
+                    uart_api_send_cmd(current_cmd);
+                    ESP_LOGI(TAG, "uart_cmd_t size: %d" ,  sizeof(cmd_t));
+                    // Switch to task_state TASK_STATE_WAIT_FOR_UART_RSPs
+                    task_state = TASK_STATE_WAIT_FOR_UART_RSP;
+                }   
             }
-        }
-
             break;
         case TASK_STATE_WAIT_FOR_UART_RSP:
             // Check bluetooth cmd is available
@@ -235,40 +222,6 @@ void task_run(){
         default:
             break;
         }
-}
-
-static void task_build_command_from_button(uint8_t button_index, cmd_t *cmd){
-    switch (button_index)
-    {
-    case BUTTON_LEFT_TABLE:
-        if(dcar_state.table_left == TABLE_LEFT_STATE_OFF){
-            // Turn on
-            cmd->value = MAX_SPEED;
-        }else if(dcar_state.table_left == TABLE_LEFT_STATE_ON){
-            // Stop
-            cmd->value = INVERSE_MAX_SPEED;
-        } else {
-            // Off
-            cmd->value = OFF;
-        }
-        cmd->device = LEFT_TABLE;
-        break;
-    case BUTTON_RIGHT_TABLE:
-        if(dcar_state.table_right == TABLE_LEFT_STATE_OFF){
-            // Turn on
-            cmd->value = MAX_SPEED;
-        }else if(dcar_state.table_right == TABLE_LEFT_STATE_ON){
-            // Stop
-            cmd->value = INVERSE_MAX_SPEED;
-        } else {
-            // Off
-            cmd->value = OFF;
-        }
-        cmd->device = RIGHT_TABLE;
-        break;
-    default:
-        break;
-    }
 }
 
 static void task_handle_dcar_state_by_cmd(cmd_t *cmd){
