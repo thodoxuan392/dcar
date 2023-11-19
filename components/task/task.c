@@ -13,7 +13,7 @@
 static const char * TAG = "Task";
 
 static const uint8_t max_retry_num = 3;
-static const uint16_t retry_interval = 200;          // 200ms
+static const uint16_t retry_interval = 1000;          // 200ms
 static uint8_t retry_current = 0;
 
 
@@ -169,7 +169,7 @@ void task_run(){
                 if(bluetooth_cmd_get(&current_cmd) || button_cmd_get(&current_cmd)){
                     // Send uart cmd
                     uart_api_reset_buffer();
-                    esp_timer_start_once(retry_timer, retry_interval * 200);
+                    esp_timer_start_once(retry_timer, retry_interval * 1000);
                     uart_api_send_cmd(current_cmd);
                     ESP_LOGI(TAG, "uart_cmd_t size: %d" ,  sizeof(cmd_t));
                     // Switch to task_state TASK_STATE_WAIT_FOR_UART_RSPs
@@ -181,6 +181,7 @@ void task_run(){
             // Check bluetooth cmd is available
             buffer_ptr = uart_api_get_buffer();
             if(uart_api_cmp_with_ptr(current_cmd , buffer_ptr)){
+                esp_timer_stop(retry_timer);
                 task_state = TASK_STATE_SUCCESS;
                 uart_api_reset_buffer();
             }else if(retry_flag){

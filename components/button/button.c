@@ -8,12 +8,18 @@
 #include <cmd.h>
 
 enum {
-    BUTTON_LED_ON = 0,
-    BUTTON_LED_OFF,
-    BUTTON_UNKNOWN
+    BUTTON_LED = 0,
+    BUTTON_UNKNOWN,
 };
 
-typedef struct {
+enum
+{
+    LED_STATE_OFF = 0,
+    LED_STATE_ON
+};
+
+typedef struct
+{
     uint64_t pin_num;
     uint8_t debounce_state;
     uint8_t prev_state;
@@ -29,16 +35,18 @@ static gpio_config_t button_config = {
 };
 
 static ButtonHandle_t button_table[] = {
-    [BUTTON_LED_ON] = { GPIO_NUM_18, false, false, false, false },
-    [BUTTON_LED_OFF] = { GPIO_NUM_19, false, false, false, false }
+    [BUTTON_LED] = {GPIO_NUM_2, false, false, false, false}
 };
-uint8_t button_nb = sizeof(button_table)/sizeof(button_table[0]);
+uint8_t button_nb = sizeof(button_table) / sizeof(button_table[0]);
 
 static uint32_t button_timer_cnt = 0;
 static bool button_timer_flag = true;
 
 static QueueHandle_t button_cmd_queue;
 static uint8_t button_cmd_queue_size = 10;
+
+// State
+uint8_t led_state = LED_STATE_OFF;
 
 static void button_handle(uint8_t button_index);
 static void button_cmd_add(cmd_t *cmd);
@@ -121,23 +129,14 @@ static void button_handle(uint8_t button_index){
     cmd_t cmd;
     switch (button_index)
     {
-    case BUTTON_LED_ON:
-        cmd.value = MAX_SPEED;
-
-        cmd.device = LIGHT_4X;
-        button_cmd_add(&cmd);
-
-        cmd.device = LIGHT_CEILING;
-        button_cmd_add(&cmd);
-
-        cmd.device = LIGHT_DRAWERS;
-        button_cmd_add(&cmd);
-
-        cmd.device = LIGHT_SIDE;
-        button_cmd_add(&cmd);
-        break;
-    case BUTTON_LED_OFF:
-        cmd.value = OFF;
+    case BUTTON_LED:
+        if(led_state == LED_STATE_OFF){
+            led_state = LED_STATE_ON;
+            cmd.value = MAX_SPEED;
+        }else {
+            led_state = LED_STATE_OFF;
+            cmd.value = OFF;
+        }
 
         cmd.device = LIGHT_4X;
         button_cmd_add(&cmd);
